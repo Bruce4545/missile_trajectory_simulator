@@ -31,7 +31,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #required modules
 import wx, wx.adv
-from plot import * #made wx.lib.plot local
+try:
+    from plot import * #made wx.lib.plot local
+except ImportError:
+    from wx.lib.plot import *
 try:
     import numarray as numpy
 except ImportError:
@@ -58,7 +61,7 @@ class ParamsPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id)
         self.presets = presets #ext ref for loading presets
         self.SetBackgroundColour('WHEAT')
- 
+
         vbox = wx.BoxSizer(wx.VERTICAL)
         #MAIN SIZER
         self.MainSizer = wx.FlexGridSizer(4,1,vgap=15,hgap=10)
@@ -75,7 +78,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer = wx.FlexGridSizer(15,6,vgap=5,hgap=0)
         #Presets
         preset_list = [''] #start with no preset chosen
-        preset_list.extend(presets.keys()) #add presets from file
+        preset_list.extend(list(presets.keys())) #add presets from file
         preset_list.sort() #sort alphabetically
         PresetChoice = wx.Choice(self,-1,choices=preset_list)
         PresetChoice.SetSelection(0)
@@ -87,7 +90,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(PresetChoice,0,wx.ALIGN_CENTER|wx.BOTTOM,border=5)
         self.MiddleSizer.Add(wx.StaticText(self,-1,'')) #blank
 
-       
+
 
         #Number of Fins
         FinsNumberText = wx.StaticText(self,-1,"Number of Fins")
@@ -110,8 +113,8 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(FinHeightText,0,wx.ALIGN_LEFT)
         self.MiddleSizer.Add(self.FinHeightControl,0,wx.ALIGN_CENTER)
         self.MiddleSizer.Add(wx.StaticText(self,-1,"    m  "),0,wx.ALIGN_LEFT)
-        #self.StageResultSizer.Add(wx.StaticText(self,-1,"km/s"),(1,6),flag=wx.ALIGN_LEFT)        
-        
+        #self.StageResultSizer.Add(wx.StaticText(self,-1,"km/s"),(1,6),flag=wx.ALIGN_LEFT)
+
         #Reentry Vehicle
         RVText = wx.StaticText(self,-1,"RV Diameter")
         self.RVControl = NumCtrl(self,-1,"Diameter of re-entry vehicle (m). Set to zero to ignore drag on re-entry.")
@@ -125,7 +128,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(SweepAngleText,0,wx.ALIGN_LEFT)
         self.MiddleSizer.Add(self.SweepAngleControl,0,wx.ALIGN_CENTER)
         self.MiddleSizer.Add(wx.StaticText(self,-1,"    deg   "),0,wx.ALIGN_LEFT)
-             
+
         #Nozzle Area
         NozzleText = wx.StaticText(self,-1,"Total Nozzle Area")
         self.NozzleControl = NumCtrl(self,-1,"Total Area of all nozzles")
@@ -140,7 +143,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(FinTipChordLengthText,0,wx.ALIGN_LEFT)
         self.MiddleSizer.Add(self.FinTipChordLengthControl,0,wx.ALIGN_CENTER)
         self.MiddleSizer.Add(wx.StaticText(self,-1,"    m    "),0,wx.ALIGN_LEFT)
-		
+
 		#Nosecone (L/D)
         LdivDText = wx.StaticText(self,-1,"Nosecone: (Length/Diameter)")
         self.LdivDControl = NumCtrl(self,-1,"(L/D) [dimensionless]")
@@ -148,7 +151,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(self.LdivDControl,0,wx.ALIGN_CENTER)
         self.MiddleSizer.Add(wx.StaticText(self,-1,"           "),0,wx.ALIGN_LEFT)
         # print("line 94")
-				
+
         #Fin Root Chord
         FinRootChordText = wx.StaticText(self,-1,"CR: Fin Root Chord")
         self.FinRootChordControl = NumCtrl(self,-1,"CR: Fin Root Chord")
@@ -173,7 +176,7 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(wx.StaticText(self,-1,"    m "),0,wx.ALIGN_LEFT)
 
         self.png = wx.StaticBitmap(self, -1, wx.Bitmap("fins.png", wx.BITMAP_TYPE_ANY),pos=(580,10))
-           
+
         #Number of Stages
         StageChoiceText = wx.StaticText(self,-1,"Number of Stages")
         self.StageChoiceBox = wx.Choice(self,-1,choices = ['1','2','3','4','5'])
@@ -182,11 +185,11 @@ class ParamsPanel(wx.Panel):
         self.MiddleSizer.Add(StageChoiceText,0,wx.ALIGN_LEFT)
         self.MiddleSizer.Add(self.StageChoiceBox,0,wx.ALIGN_CENTER)
         self.MiddleSizer.Add(wx.StaticText(self,-1," "),0) #add blank
-        
+
         #TOP SIZER
         #self.TopSizer = wx.FlexGridSizer(3,1,vgap=10)
         self.TopSizer = wx.FlexGridSizer(10,3,vgap=5, hgap=5)
-        
+
         #self.TrajectoryChoiceBox = wx.Choice(self,-1,choices = ['Minimum Energy','Thrust Vector','Burnout Angle','Turn Angle'])
         #only one trajectory choice is working properly
         #investigate others if time
@@ -198,7 +201,7 @@ class ParamsPanel(wx.Panel):
         self.TrajectoryChoiceSizer.Add(self.TrajectoryChoiceBox,0)
         self.Bind(wx.EVT_CHOICE, self.OnTrajectoryChoice, self.TrajectoryChoiceBox)
         self.TopSizer.Add(self.TrajectoryChoiceSizer,0)
-        
+
         #NOSECONE CHOICE SIZER
         self.NoseconeChoiceSizer = wx.FlexGridSizer(1,2, vgap=0, hgap=5)
         self.NoseconeChoiceSizer.Add(wx.StaticText(self,-1,"Nosecone"),0)
@@ -208,7 +211,7 @@ class ParamsPanel(wx.Panel):
         self.Bind(wx.EVT_CHOICE, self.OnNoseconeChoice, self.NoseconeChoiceBox)
         self.TopSizer.Add(self.NoseconeChoiceSizer,0)
 
-        
+
         #EST RANGE SIZER
         self.EstRangeSizer = wx.FlexGridSizer(1,3, vgap=0, hgap=5)
         self.EstRangeSizer.Add(wx.StaticText(self,-1,"Est. Range"),0)
@@ -216,7 +219,7 @@ class ParamsPanel(wx.Panel):
         self.EstRangeSizer.Add(self.EstRangeControl,0)
         self.EstRangeSizer.Add(wx.StaticText(self,-1,"km"),0)
         self.TopSizer.Add(self.EstRangeSizer,0)
-                
+
         #ETA SIZER
         self.EtaSizer = wx.FlexGridSizer(2,4,hgap=5,vgap=10)
         self.EtaSizer.Add(wx.StaticText(self,-1,"For t>"),0)
@@ -230,7 +233,7 @@ class ParamsPanel(wx.Panel):
         self.EtaTurnAngle = NumCtrl(self,-1,"Angle between thrust and velocity vectors for above timespan (deg)")
         self.EtaSizer.Add(self.EtaTurnAngle,0)
         self.TopSizer.Add(self.EtaSizer,0)
-        
+
         #BURNOUT ANGLE SIZER
         # self.BurnoutAngleSizer = wx.FlexGridSizer(1,3,hgap=5)
         self.BurnoutAngleSizer = wx.FlexGridSizer(0,0,vgap=0, hgap=5)
@@ -239,7 +242,7 @@ class ParamsPanel(wx.Panel):
         self.BurnoutAngleSizer.Add(self.BurnoutAngleCtrl,0)
         self.BurnoutAngleSizer.Add(wx.StaticText(self,-1,"deg h"),0)
         self.TopSizer.Add(self.BurnoutAngleSizer,0)
-        
+
         #TURN ANGLE SIZER
         self.TurnAngleSizer = wx.FlexGridSizer(2,4,hgap=5,vgap=10)
         self.TurnAngleSizer.Add(wx.StaticText(self,-1,"For t>"),0)
@@ -256,7 +259,7 @@ class ParamsPanel(wx.Panel):
         self.TurnAngleEnd = NumCtrl(self,-1,"Turnover angle at end (deg from vertical)")
         self.TurnAngleSizer.Add(self.TurnAngleEnd)
         self.TopSizer.Add(self.TurnAngleSizer,0)
-        
+
         #start with MET
         self.TrajectoryChoiceBox.SetSelection(0)
         self.TopSizer.Hide(self.BurnoutAngleSizer)
@@ -264,16 +267,16 @@ class ParamsPanel(wx.Panel):
         self.TopSizer.Hide(self.TurnAngleSizer)
         self.TopSizer.Show(self.EstRangeSizer)
         self.Layout()
-        
+
         #start with Nosecone
         self.NoseconeChoiceBox.SetSelection(0)
         #self.TopSizer.Show(self.NoseconeSizer)
 		# This is where I would enter other cones as well.
         self.Layout()
-		
-		
+
+
         #END MIDDLE SIZER
-        
+
         #STAGE SIZER
         self.StageSizer = wx.GridBagSizer(5,6)
         self.StageSizer.Add(wx.StaticText(self,-1,"Fuel Mass"),(1,0))
@@ -309,31 +312,31 @@ class ParamsPanel(wx.Panel):
             self.StageSizer.Hide(self.StageDryMassCtrl[i])
             self.StageSizer.Hide(self.StageIspCtrl[i])
             self.StageSizer.Hide(self.StageThrustCtrl[i])
-            
+
         #place units labels
         self.StageSizer.Add(wx.StaticText(self,-1,"kg"),(1,6),flag=wx.ALIGN_LEFT)
         self.StageSizer.Add(wx.StaticText(self,-1,"kg"),(2,6),flag=wx.ALIGN_LEFT)
         self.StageSizer.Add(wx.StaticText(self,-1,"sec"),(3,6),flag=wx.ALIGN_LEFT)
         self.StageSizer.Add(wx.StaticText(self,-1,"kg f"),(4,6),flag=wx.ALIGN_LEFT)
-        
-        
+
+
         #Bottom Button
         RunButton = wx.Button(self,-1,"Run Simulation")
         self.Bind(wx.EVT_BUTTON,self.OnRun, RunButton)
         RunButton.SetDefault()
         RunButton.SetSize(RunButton.GetBestSize())
-        
+
         self.MainSizer.Add(self.MiddleSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP,10)
         self.MainSizer.Add(self.TopSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT,10)
         self.MainSizer.Add(self.StageSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT,10)
         self.MainSizer.Add(RunButton,0,wx.ALIGN_LEFT|wx.EXPAND | wx.ALL, 50)
-        self.MainSizer.SetSizeHints(self)      
-                 
+        self.MainSizer.SetSizeHints(self)
+
         #final setup
         self.SetSizer(self.MainSizer)
         self.SetAutoLayout(1)
         self.Layout()
-        
+
     def OnFinsChoice(self, event, numfins_override=None):
         #event handler for number of stages
         if numfins_override:
@@ -341,7 +344,7 @@ class ParamsPanel(wx.Panel):
             #used when loading numfins from preset, SetValue doesn't call event handler
         else:
             numfins = int(event.GetString())
-            print "NUMFINS=",numfins
+            print("NUMFINS=",numfins)
             if numfins !=0:
                 #self.StageSizer.Show(self.FinsNumberText)
 
@@ -351,7 +354,7 @@ class ParamsPanel(wx.Panel):
                 self.MiddleSizer.Add(FinHeightText,0,wx.ALIGN_LEFT)
                 self.MiddleSizer.Add(self.FinHeightControl,0,wx.ALIGN_CENTER)
                 self.MiddleSizer.Add(wx.StaticText(self,-1,"m"),0,wx.ALIGN_LEFT)
-                
+
                 #Fin Sweep Angle
                 SweepAngleText = wx.StaticText(self,-1,"Sweep Angle (degC)")
                 self.SweepAngleControl = NumCtrl(self,-1,"Sweep Angle (deg C)")
@@ -383,8 +386,8 @@ class ParamsPanel(wx.Panel):
 
 
 
-                
-                self.FinsSizer.Show(self.FinHeight)   # S 
+
+                self.FinsSizer.Show(self.FinHeight)   # S
                 self.FinsSizer.Show(self.SweepAngle)  # Angle
                 self.FinsSizer.Show(self.FinTipChordLength) # CT[m]
                 self.FinsSizer.Show(self.FinRootChord) # CR[m]
@@ -400,7 +403,7 @@ class ParamsPanel(wx.Panel):
             #used when loading numstages from preset, SetValue doesn't call event handler
         else:
             numstages = int(event.GetString())
-            print "NUMSTAGES=",numstages
+            print("NUMSTAGES=",numstages)
         #show requested stages
         for i in range(1,numstages+1):
             self.StageSizer.Show(self.StageNumberText[i])
@@ -420,20 +423,20 @@ class ParamsPanel(wx.Panel):
             self.StageThrustCtrl[i].SetValue("")
             self.StageSizer.Hide(self.StageThrustCtrl[i])
         self.Layout()
-		
+
 
 
     def OnNoseconeChoice(self,event):
         choice = event.GetString()
-        print('Your choice is:'+ choice)
+        print(('Your choice is:'+ choice))
 #        if choice == 'Conical':
 #            self.TopSizer.Show(self.Nosecone)
 #        self.Layout()
 
 
 
-		
-        
+
+
     def OnTrajectoryChoice(self,event):
         choice = event.GetString()
         if choice == 'Minimum Energy':
@@ -457,7 +460,7 @@ class ParamsPanel(wx.Panel):
             self.TopSizer.Hide(self.EstRangeSizer)
             self.TopSizer.Hide(self.BurnoutAngleSizer)
         self.Layout()
-    
+
     def OnPresetChoice(self, event):
         #preset dictionary is in presets.txt
         try:
@@ -466,13 +469,19 @@ class ParamsPanel(wx.Panel):
             self.PayloadWeightControl.SetValue(str(preset_data['payload']))
             self.RVControl.SetValue(str(preset_data['rvdiam']))
             self.NozzleControl.SetValue(str(preset_data['nozzlearea']))
-            self.LdivDControl.SetValue(str(preset_data['LdivD']))			
+            self.LdivDControl.SetValue(str(preset_data['LdivD']))
             self.EstRangeControl.SetValue(str(preset_data['estrange']))
             self.StageChoiceBox.SetSelection(numstages-1)
             self.DiameterControl.SetValue(str(preset_data['missilediam']))
+            self.FinsNumberControl.SetValue(str(preset_data.get('FinsNumber', 0)))
+            self.FinHeightControl.SetValue(str(preset_data.get('FinHeight', 0)))
+            self.SweepAngleControl.SetValue(str(preset_data.get('SweepAngle', 0)))
+            self.FinTipChordLengthControl.SetValue(str(preset_data.get('FinTipChordLength', 0)))
+            self.FinRootChordControl.SetValue(str(preset_data.get('FinRootChord', 0)))
+            self.FinThicknessControl.SetValue(str(preset_data.get('FinThickness', 0)))
             #because choices[0]=1
             #SetSelection takes integer, not string
-            
+
             for i in range(1,numstages+1):
                 self.StageFuelMassCtrl[i].SetValue(str(preset_data['fuelmass'][i]))
                 self.StageDryMassCtrl[i].SetValue(str(preset_data['drymass'][i]))
@@ -486,75 +495,71 @@ class ParamsPanel(wx.Panel):
         except UnboundLocalError:
             #when choosing null twice, catch error
             pass
-        
+
     def OnRun(self,event):
         sim = Simulation(self)
-        
+
         try:
 
-            sim.FinHeight = float(self.FinHeightControl.GetValue())
-            sim.SweepAngle = float(self.SweepAngleControl.GetValue())
-            sim.FinTipChordLength = float(self.FinTipChordLengthControl.GetValue())
-            sim.FinRootChord = float(self.FinRootChordControl.GetValue())
-            sim.FinThickness = float(self.FinThicknessControl.GetValue())
-            sim.FinsNumber = float(self.FinsNumberControl.GetValue())
+            sim.FinHeight = self._float_value("S: Fin Span", self.FinHeightControl, 0)
+            sim.SweepAngle = self._float_value("Sweep Angle", self.SweepAngleControl, 0)
+            sim.FinTipChordLength = self._float_value("CT: Fin Tip Chord", self.FinTipChordLengthControl, 0)
+            sim.FinRootChord = self._float_value("CR: Fin Root Chord", self.FinRootChordControl, 0)
+            sim.FinThickness = self._float_value("Fin Thickness", self.FinThicknessControl, 0)
+            sim.FinsNumber = self._float_value("Number of Fins", self.FinsNumberControl, 0)
 
 
-            sim.payload = float(self.PayloadWeightControl.GetValue())
-            sim.rvdiam = float(self.RVControl.GetValue())
-            sim.nozzlearea = float(self.NozzleControl.GetValue())
-            sim.LdivD = float(self.LdivDControl.GetValue())
-            sim.missilediam = float(self.DiameterControl.GetValue())
+            sim.payload = self._float_value("Payload Weight", self.PayloadWeightControl)
+            sim.rvdiam = self._float_value("RV Diameter", self.RVControl)
+            sim.nozzlearea = self._float_value("Total Nozzle Area", self.NozzleControl)
+            sim.LdivD = self._float_value("Nosecone: Length/Diameter", self.LdivDControl)
+            sim.missilediam = self._float_value("Missile Diameter", self.DiameterControl)
             sim.Nosecone = self.NoseconeChoiceBox.GetStringSelection()
             sim.trajectory = self.TrajectoryChoiceBox.GetStringSelection()
             if sim.trajectory == 'Minimum Energy':
-                sim.est_range = float(self.EstRangeControl.GetValue())*1000 #convert to m
+                sim.est_range = self._float_value("Est. Range", self.EstRangeControl)*1000 #convert to m
 
             if sim.trajectory == 'Thrust Vector':
-                sim.TStartTurn = float(self.EtaTStartTurn.GetValue())
-                sim.TEndTurn = float(self.EtaTEndTurn.GetValue())
-                sim.TurnAngle = float(self.EtaTurnAngle.GetValue())
-                
+                sim.TStartTurn = self._float_value("Eta start time", self.EtaTStartTurn)
+                sim.TEndTurn = self._float_value("Eta end time", self.EtaTEndTurn)
+                sim.TurnAngle = self._float_value("Eta turn angle", self.EtaTurnAngle)
+
             if sim.trajectory == 'Burnout Angle':
-                sim.burnout_angle = float(self.BurnoutAngleCtrl.GetValue())
-                
+                sim.burnout_angle = self._float_value("Burnout Angle", self.BurnoutAngleCtrl)
+
             if sim.trajectory == 'Turn Angle':
-                sim.TurnTimeStart = float(self.TurnTimeStart.GetValue())
-                sim.TurnTimeEnd = float(self.TurnTimeEnd.GetValue())
-                sim.TurnAngleStart = float(self.TurnAngleStart.GetValue())
-                sim.TurnAngleEnd = float(self.TurnAngleEnd.GetValue())
-                
+                sim.TurnTimeStart = self._float_value("Turn start time", self.TurnTimeStart)
+                sim.TurnTimeEnd = self._float_value("Turn end time", self.TurnTimeEnd)
+                sim.TurnAngleStart = self._float_value("Turn start angle", self.TurnAngleStart)
+                sim.TurnAngleEnd = self._float_value("Turn end angle", self.TurnAngleEnd)
+
 #            if sim.Nosecone == 'Conical':
 #                sim.Nosecone = float(self.NoseconeControl.GetValue()+1)
-				
-				
+
+
             sim.numstages = int(self.StageChoiceBox.GetSelection()+1)
-            print 'sim.numstages =',sim.numstages
+            print('sim.numstages =',sim.numstages)
             #because choices[0]=1
 
             for i in range(1,sim.numstages+1):
-                sim.fuelmass.append(float(self.StageFuelMassCtrl[i].GetValue()))
-                sim.m0.append(float(self.StageDryMassCtrl[i].GetValue())+sim.fuelmass[i])
+                sim.fuelmass.append(self._float_value("Stage %i fuel mass" % i, self.StageFuelMassCtrl[i]))
+                sim.m0.append(self._float_value("Stage %i dry mass" % i, self.StageDryMassCtrl[i])+sim.fuelmass[i])
                 sim.fuelfraction.append(float(sim.fuelmass[i]/sim.m0[i]))
-                sim.Isp0.append(float(self.StageIspCtrl[i].GetValue()))
-                sim.thrust0.append(float(self.StageThrustCtrl[i].GetValue())*9.81) #convert from kgf to N
+                sim.Isp0.append(self._float_value("Stage %i Isp" % i, self.StageIspCtrl[i]))
+                sim.thrust0.append(self._float_value("Stage %i thrust" % i, self.StageThrustCtrl[i])*9.81) #convert from kgf to N
                 sim.dMdt.append(float(sim.thrust0[i]/(sim.Isp0[i]*9.81)))
-            
+
             self.sim = sim #external reference for writing sim params to file
-            
+
             app = wx.GetTopLevelParent(self)
-            
+
             #run sim, saving results
             trajectory = self.TrajectoryChoiceBox.GetStringSelection()
             app.Results.data = sim.integrate(trajectory)
-            
-			#run sim, saving results
-            Nosecone = self.NoseconeChoiceBox.GetStringSelection()
-            app.Results.data = sim.integrate(Nosecone)                     
-			
+
             app.nb.AdvanceSelection(forward=True) #turn to results page
-            
-            
+
+
             #show requested stages
             other = app.Results #short ref for below calls
             for i in range(1,sim.numstages+1):
@@ -564,8 +569,7 @@ class ParamsPanel(wx.Panel):
                 other.StageResultSizer.Show(other.StageHeightResult[i])
                 other.StageResultSizer.Show(other.StageRangeResult[i])
                 other.StageResultSizer.Show(other.StageTimeResult[i])
-                other.StageResultSizer.Show(other.StageMachResult[i])
-				
+
             """ #hide unused stages in Results panel
             for i in range(sim.numstages+0,6):
                 other.StageResultSizer.Hide(app.Results.StageNumberText[i])
@@ -576,37 +580,49 @@ class ParamsPanel(wx.Panel):
                 other.StageResultSizer.Hide(other.StageTimeResult[i])
                 other.StageResultSizer.Hide(other.StageMachResult[i]) """
             app.Results.Layout()
-                    
-        except ValueError:    
+
+        except ValueError as exc:
             #Validator should take care of this, but just in case.
-            dlg = wx.MessageDialog(self,"Please make sure all fields are filled in.","Entry error",wx.OK | wx.ICON_INFORMATION)
+            message = str(exc) or "Please make sure all fields are filled in."
+            dlg = wx.MessageDialog(self, message, "Entry error", wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             dlg.Destroy()
 
+    def _float_value(self, label, control, default=None):
+        value = control.GetValue().strip()
+        if value == "" and default is not None:
+            return float(default)
+        if value == "":
+            raise ValueError("Please fill in: %s" % label)
+        try:
+            return float(value)
+        except ValueError:
+            raise ValueError("Please enter a valid number for: %s" % label)
+
 class PlotFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, (550,30), (600, 400))        
+        wx.Frame.__init__(self, parent, id, title, (550,30), (600, 400))
         self.canvas = PlotCanvas(self)
         #because PlotCanvas needs a frame, and won't play nice inside the main window
-                
+
 class ResultsPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id)
         # COLOUR SET
         self.SetBackgroundColour('THISTLE')
 
-        
+
         #RESULTS DATA DICTIONARY
         self.data = {'Time':[0],'Height':[0],'Velocity':[0],'Thrust':[0],'Drag':[0],'CD':[0],'cdfins':[0],'Gamma':[0],'Range':[0]}
         #create empty data dictionary
-        
+
         app = wx.GetTopLevelParent(self)
         self.frame = PlotFrame(None,-1,"Results Plot")
         #create new plot window
-        
+
         #MAIN SIZER
         MainResultsSizer = wx.FlexGridSizer(5,0,vgap=12,hgap=0)
-        
+
         #RESULT SIZER
         FinalResultSizer = wx.FlexGridSizer(5,3,vgap=10,hgap=10)
         #Apogee
@@ -629,7 +645,7 @@ class ResultsPanel(wx.Panel):
         self.FlightTimeResult = NumCtrl(self,-1,"Time from liftoff to impact (sec)",style=wx.TE_READONLY)
         FinalResultSizer.Add(self.FlightTimeResult,0,wx.ALIGN_CENTER)
         FinalResultSizer.Add(wx.StaticText(self,-1,"sec"),0,wx.ALIGN_RIGHT)
-        
+
         #STAGE RESULT SIZER
         self.StageResultSizer = wx.GridBagSizer(5,7)
         self.StageResultSizer.Add(wx.StaticText(self,-1,"Velocity"),(1,0))
@@ -646,7 +662,7 @@ class ResultsPanel(wx.Panel):
         self.StageRangeResult=['']
         self.StageTimeResult=['']
         self.StageMachResult=['']
-		
+
         #create all stage data fields
         for i in range(1,6):
             self.StageNumberText.append(wx.StaticText(self,-1,"Stage %d" % i))
@@ -663,23 +679,23 @@ class ResultsPanel(wx.Panel):
             self.StageResultSizer.Add(self.StageRangeResult[i],(4,i))
             self.StageTimeResult.append(NumCtrl(self,-1,"Time of stage %i burnout (sec)" % i,style=wx.TE_READONLY))
             self.StageResultSizer.Add(self.StageTimeResult[i],(5,i))
-            
+
         #place units labels
         self.StageResultSizer.Add(wx.StaticText(self,-1,"km/s"),(1,6),flag=wx.ALIGN_LEFT)
         self.StageResultSizer.Add(wx.StaticText(self,-1,"deg h"),(2,6),flag=wx.ALIGN_LEFT)
         self.StageResultSizer.Add(wx.StaticText(self,-1,"km"),(3,6),flag=wx.ALIGN_LEFT)
         self.StageResultSizer.Add(wx.StaticText(self,-1,"km"),(4,6),flag=wx.ALIGN_LEFT)
         self.StageResultSizer.Add(wx.StaticText(self,-1,"sec"),(5,6),flag=wx.ALIGN_LEFT)
-        
+
         MainResultsSizer.Add(FinalResultSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP,10)
         MainResultsSizer.Add(self.StageResultSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT,10)
         MainResultsSizer.Add(wx.StaticText(self,-1,"Results at Stage Burnout"),0,
                 wx.ALIGN_CENTER|wx.TOP,-10)
-        
+
         #show/hide of unused stages is done in OnRun method of Params panel
-        
+
         BottomSizer = wx.FlexGridSizer(1,2,vgap=0,hgap=50)
-        
+
         #Plot Controls
         PlotControlSizer = wx.FlexGridSizer(2,3,vgap=10,hgap=10)
         LeftControlSizer = wx.FlexGridSizer(5,1,vgap=5,hgap=0)
@@ -691,11 +707,11 @@ class ResultsPanel(wx.Panel):
         self.YRadioBox = wx.RadioBox(self,-1,choices=["Height","Velocity","Thrust","Drag","CD","cdfins","Gamma"],
             majorDimension=1,style=wx.RA_SPECIFY_COLS)
 
-        
+
         PlotControlSizer.Add(self.YRadioBox,0,wx.ALIGN_CENTER_VERTICAL)
         PlotControlSizer.Add(wx.StaticText(self,-1,"vs"),0,wx.ALIGN_CENTER)
         PlotControlSizer.Add(self.XRadioBox,0,wx.ALIGN_CENTER_VERTICAL)
-        
+
         #Plot Buttons
         PlotButton = wx.Button(self,-1,"Plot")
         self.Bind(wx.EVT_BUTTON,self.OnPlot, PlotButton)
@@ -704,21 +720,21 @@ class ResultsPanel(wx.Panel):
         WriteButton = wx.Button(self,-1,"Save Data")
         self.Bind(wx.EVT_BUTTON,self.OnWriteToFile, WriteButton)
         WriteButton.SetSize(WriteButton.GetBestSize())
-        
+
         PlotButtonSizer = wx.FlexGridSizer(2,1,vgap=20,hgap=0)
         PlotButtonSizer.Add(PlotButton)
-        PlotButtonSizer.Add(WriteButton)        
-        
+        PlotButtonSizer.Add(WriteButton)
+
         BottomSizer.Add(PlotControlSizer,0,wx.ALIGN_CENTER_VERTICAL)
         BottomSizer.Add(PlotButtonSizer,0,wx.ALIGN_CENTER_VERTICAL)
-        
+
         MainResultsSizer.Add(BottomSizer,0,wx.ALIGN_CENTER|wx.LEFT|wx.RIGHT,10)
 
         #final setup
         self.SetSizer(MainResultsSizer)
         self.SetAutoLayout(1)
         self.Layout()
-        
+
     def OnPlot(self,event):
         plot = []
         x = self.XRadioBox.GetStringSelection()
@@ -731,11 +747,11 @@ class ResultsPanel(wx.Panel):
             self.frame = PlotFrame(None,-1,"Results Plot")
         self.frame.canvas.Reset() #clear previous
         self.frame.Show(True) #show blank
-            
+
         #set plot title here before adding units to description string
         title = "%s vs %s" % (y,x)
 
-        #determine stage burnouts        
+        #determine stage burnouts
         app = wx.GetTopLevelParent(self)
         sim = app.Params.sim
         for i in range(1,sim.numstages+1):
@@ -747,12 +763,12 @@ class ResultsPanel(wx.Panel):
                 x_stage = float(self.StageVelocityResult[i].GetValue())
             if x == "Mach":
                 x_stage = float(self.StageMachResult[i].GetValue())
-            
-			#can't figure out y value
+
+            #can't figure out y value
             #list lookup fails because array is floats w/ arbitrary precision
-            #plot stage burnout    
+            #plot stage burnout
             plot.append(PolyMarker([(x_stage,0)],
-            
+
                 legend="Stage %d Burnout" % i,marker='cross',colour='red',size=1))
 
         #unit conversion
@@ -763,7 +779,13 @@ class ResultsPanel(wx.Panel):
             x_data = self.data[x] #in seconds
             x = x + ' (sec)'
         elif x == "Velocity":
-		    x_data = self.data[x] 
+            x_data = self.data[x]
+            x = x + ' (m/s)'
+        elif x == "Mach":
+            x_data = [
+                velocity / sqrt(1.4 * 287 * (self._temperature(height) + 273.15))
+                for velocity, height in zip(self.data["Velocity"], self.data["Height"])
+            ]
         if y == "Drag":
             y_data = self.data[y] #in N
             y = y + ' (N)'
@@ -780,41 +802,32 @@ class ResultsPanel(wx.Panel):
         elif y == "Thrust":
             y_data = self.data[y] #in N
             y = y + ' (N)'
-        elif x == "Mach":
-            h = self.data["Height"]
-            # print h
-            if h <= 11000.:
-            #troposphere
-               t = 15.04 - .00649*h
-            elif h > 11000. and h <= 25000.:
-            #lower stratosphere
-               t = -56.46
-            elif h > 25000.:
-               t = 131.21 + .00299*h
-            t = t + 273.15 #convert to kelvin
-            a = sqrt(1.4*287*t) 
-            global x_data # note added this to not have the UnboundLocalError: https://eli.thegreenplace.net/2011/05/15/understanding-unboundlocalerror-in-python/
-            # and I removed the def temperature(h) function since this is the same code. 
-            x_data = self.data["Velocity"]/a
         else:
             y_data = self.data[y] #for others, don't add units
-        
+
         #plot trajectory line
-        line = numpy.array(zip(x_data,y_data))
+        line = numpy.array(list(zip(x_data,y_data)))
         plot.append(PolyLine(line,legend=x,colour='red'))
-        
+
         self.frame.canvas.Draw(PlotGraphics(plot,title,x,y))
-        
-    
-                
+
+    def _temperature(self, h):
+        if h <= 11000.:
+            return 15.04 - .00649*h
+        if h <= 25000.:
+            return -56.46
+        return -131.21 + .00299*h
+
+
+
     def OnWriteToFile(self,event):
-    
-        dlg = wx.FileDialog(self, message="Save file as ...", defaultDir=os.getcwd(), 
+
+        dlg = wx.FileDialog(self, message="Save file as ...", defaultDir=os.getcwd(),
             defaultFile="data", style=wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.outfile = open(path,'w')
-            
+
             app = wx.GetTopLevelParent(self) #get ref to AppFrame instance for printing stage params
             sim = app.Params.sim
             for i in range(1,sim.numstages+1):
@@ -827,8 +840,8 @@ class ResultsPanel(wx.Panel):
                 self.outfile.write("Thrust (N): " + str(sim.thrust0[i]) + '\n')
                 self.outfile.write("dM/dt: " + str(sim.dMdt[i]) + '\n')
             self.outfile.write("\nTIME,HEIGHT,VELOCITY,THRUST,DRAG,CD,GAMMA,RANGE\n")
-            
-            flat = zip(self.data['Time'],
+
+            flat = list(zip(self.data['Time'],
                     self.data['Height'],
                     self.data['Velocity'],
                     self.data['Thrust'],
@@ -836,20 +849,20 @@ class ResultsPanel(wx.Panel):
                     self.data['CD'],
                     self.data['cdfins'],
                     self.data['Gamma'],
-                    self.data['Range'])
+                    self.data['Range']))
             #create flat list
-                    
-            for i in range(1,len(flat)/2):
+
+            for i in range(1,len(flat)//2):
                 for n in range(0,len(flat[i])):
                     self.outfile.write('%.3f' % flat[i][n])
                     self.outfile.write(',')
                 self.outfile.write('\n')
 
-            print("Data written to '%s'" % path)
+            print(("Data written to '%s'" % path))
             self.outfile.close()
         #clean up
         dlg.Destroy()
-        
+
 
 
 '''
@@ -858,13 +871,13 @@ class FinsPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id)
         #MainSizer = wx.FlexGridSizer(4,1,vgap=25)
         MainSizer = wx.FlexGridSizer(0,1,vgap=25,hgap=0)
-        
+
         TopSizer = wx.FlexGridSizer(1,2,vgap=0,hgap=10)
-        
+
         self.png = wx.StaticBitmap(self, -1, wx.Bitmap("fins.png", wx.BITMAP_TYPE_ANY),pos=(540,10))
-        
+
 '''
-        
+
 
 
 
@@ -878,7 +891,7 @@ class AdvancedPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id)
         #MainSizer = wx.FlexGridSizer(4,1,vgap=25)
         MainSizer = wx.FlexGridSizer(0,1,vgap=25,hgap=0)
-        
+
         TopSizer = wx.FlexGridSizer(1,2,vgap=0,hgap=10)
         VariableSizer = wx.FlexGridSizer(1,2,vgap=0,hgap=10)
         VariableSizer.Add(wx.StaticText(self,-1,"Solve for"),0,wx.ALIGN_LEFT)
@@ -886,38 +899,38 @@ class AdvancedPanel(wx.Panel):
         #self.VariableChoice.SetSelection(0) #only one kind of problem to solve
         VariableSizer.Add(self.VariableChoice,0,wx.ALIGN_LEFT)
         self.Bind(wx.EVT_CHOICE,self.OnChooseVar,self.VariableChoice)
-        
+
         StageNumSizer = wx.FlexGridSizer(1,2,vgap=0,hgap=10)
         StageNumSizer.Add(wx.StaticText(self,-1,"Stage"),0)
         self.StageChoiceBox = wx.Choice(self,-1,choices = ['1','2','3','4','5'])
         StageNumSizer.Add(self.StageChoiceBox,0,wx.ALIGN_LEFT)
         self.StageChoiceBox.SetSelection(0)
-        
+
         TopSizer.Add(VariableSizer,0)
         TopSizer.Add(StageNumSizer,0)
-        
+
         # ConstraintSizer = wx.FlexGridSizer(3,3,hgap=10,vgap=10)
         ConstraintSizer = wx.FlexGridSizer(0,3,hgap=10,vgap=10)
         ConstraintSizer.Add(wx.StaticText(self,-1,"Stage Mass"),0,wx.ALIGN_LEFT)
         self.StageMassCtrl = NumCtrl(self,-1,"Fuel Mass + Dry Mass (kg). Does not include payload.")
         ConstraintSizer.Add(self.StageMassCtrl)
         ConstraintSizer.Add(wx.StaticText(self,-1,"kg"),0,wx.ALIGN_LEFT)
-        
+
         ConstraintSizer.Add(wx.StaticText(self,-1,"Fuel Fraction"),0,wx.ALIGN_LEFT)
         self.FuelFractionCtrl = NumCtrl(self,-1,"Fuel Mass / Stage Mass")
         ConstraintSizer.Add(self.FuelFractionCtrl)
         ConstraintSizer.Add(wx.StaticText(self,-1,"%"),0,wx.ALIGN_LEFT)
-        
+
         ConstraintSizer.Add(wx.StaticText(self,-1,"Fuel Mass"),0,wx.ALIGN_LEFT)
         self.FuelMassCtrl = NumCtrl(self,-1,"Fuel Mass (kg)",style=wx.TE_READONLY)
         ConstraintSizer.Add(self.FuelMassCtrl)
         ConstraintSizer.Add(wx.StaticText(self,-1,"kg"),0,wx.ALIGN_LEFT)
-        
+
         ConstraintSizer.Add(wx.StaticText(self,-1,"Dry Mass"),0,wx.ALIGN_LEFT)
         self.DryMassCtrl = NumCtrl(self,-1,"Dry Mass (kg)",style=wx.TE_READONLY)
         ConstraintSizer.Add(self.DryMassCtrl)
         ConstraintSizer.Add(wx.StaticText(self,-1,"kg"),0,wx.ALIGN_LEFT)
-        
+
         MiddleSizer = wx.FlexGridSizer(2,2,hgap=25,vgap=10)
         MiddleSizer.Add(wx.StaticText(self,-1,"Estimated Range"),0)
         self.AnsGuessControl = NumCtrl(self,-1,"Your guess for the missile range")
@@ -928,7 +941,7 @@ class AdvancedPanel(wx.Panel):
         #SolveButton.SetDefault()
         #can't have two default buttons...
         SolveButton.SetSize(SolveButton.GetBestSize())
-        
+
         AnswerSizer = wx.FlexGridSizer(2,2,hgap=5,vgap=5)
         AnswerSizer.Add(wx.StaticText(self,-1,"Variable"),0)
         self.AnswerControl = NumCtrl(self,-1,"First found value of the variable that gives the desired range",style=wx.TE_READONLY)
@@ -940,14 +953,14 @@ class AdvancedPanel(wx.Panel):
         #use wx.Gauge for visual feedback
         self.max_runs = 25
         self.Gauge = wx.Gauge(self,-1,self.max_runs,size = [250,25],style = wx.GA_HORIZONTAL)
-        
+
         MainSizer.Add(TopSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP,10)
         MainSizer.Add(ConstraintSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT,10)
         MainSizer.Add(MiddleSizer,0,wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT,10)
         MainSizer.Add(SolveButton,0,wx.ALIGN_CENTER_HORIZONTAL)
         MainSizer.Add(self.Gauge,0,wx.ALIGN_CENTER_HORIZONTAL)
         MainSizer.Add(AnswerSizer,0,wx.ALIGN_CENTER_HORIZONTAL|wx.TOP,-20)
-        
+
         self.SetSizer(MainSizer)
         self.SetAutoLayout(1)
         self.Layout()
@@ -967,7 +980,7 @@ class AdvancedPanel(wx.Panel):
             self.CheckConstraints()
         #set guesses
         self.AnsGuessControl.SetValue(app.Params.EstRangeControl.GetValue())
-        
+
     def CheckConstraints(self):
         app = wx.GetTopLevelParent(self)
         nstage = int(self.StageChoiceBox.GetSelection()+1)
@@ -995,13 +1008,13 @@ class AdvancedPanel(wx.Panel):
 
     def OnSolve(self,event):
         "Solves for unknown variable iteratively. May take a while."
-        
+
         if self.var_string == "":
             dlg = wx.MessageDialog(self,"Please choose a variable to solve for.","Unable to solve",wx.OK | wx.ICON_INFORMATION)
             dlg.ShowModal()
             dlg.Destroy()
             return False
-            
+
         try:
             #get solver params
             ans_est = float(self.AnsGuessControl.GetValue())
@@ -1013,17 +1026,17 @@ class AdvancedPanel(wx.Panel):
                 return False
 
         #print "Solve for stage",int(self.StageChoiceBox.GetSelection()+1),self.var_string
-        
+
         #init search variables, need two starting values
         #f is sim range - ans_est, because secant method solves for roots
         oldx = var_est*.99 #hopefully still a reasonable value
         self.var_control.SetValue("%.2f" % oldx)
         oldf = self.RunSim() - ans_est
-        
+
         x = var_est
         self.var_control.SetValue("%.2f" % var_est)
         f =  self.RunSim() - ans_est
-        
+
         run = 0
         tolerance = 1e-2
 
@@ -1047,7 +1060,7 @@ class AdvancedPanel(wx.Panel):
             self.var_control.SetValue("%.2f" % x)
             (oldf, f) = (f, self.RunSim()-ans_est)
             run += 1 #increment run number
-            print("sec(%d): x=%s, f(x)=%s, oldx=%s, oldf=%s,\n" % (run,x,f,oldx,oldf))
+            print(("sec(%d): x=%s, f(x)=%s, oldx=%s, oldf=%s,\n" % (run,x,f,oldx,oldf)))
             self.Gauge.SetValue(run)
             self.AnswerControl.SetValue("%.2f" % x)
             self.RangeControl.SetValue("%.2f" % (f+ans_est))
@@ -1062,7 +1075,7 @@ class AdvancedPanel(wx.Panel):
         self.var_control.SetValue("%.2f" % oldx)
         self.AnswerControl.SetValue("%.2f" % oldx)
         self.Gauge.SetValue(self.max_runs)
-        
+
         if self.var_string == "Fuel Fraction":
             #sanity check
             answer = float(self.AnswerControl.GetValue())
@@ -1070,10 +1083,10 @@ class AdvancedPanel(wx.Panel):
                 dlg = wx.MessageDialog(self,"Solver converged on an invalid value. Try inputting a more reasonable starting value for the variable.","Unable to solve",wx.OK | wx.ICON_INFORMATION)
                 dlg.ShowModal()
                 dlg.Destroy()
-                
+
     def RunSim(self):
         self.CheckConstraints()
-    
+
         sim = Simulation(self)
         app = wx.GetTopLevelParent(self)
         try:
@@ -1100,7 +1113,7 @@ class AdvancedPanel(wx.Panel):
                 sim.TurnAngle = float(self.EtaTurnAngle.GetValue())
             if trajectory == 'Burnout Angle':
                 sim.burnout_angle = float(self.BurnoutAngleCtrl.GetValue())
-                
+
         except ValueError:
                 dlg = wx.MessageDialog(self,"Please fill in all fields in Parameters panel.","Unable to solve",wx.OK | wx.ICON_INFORMATION)
                 dlg.ShowModal()
@@ -1108,13 +1121,13 @@ class AdvancedPanel(wx.Panel):
                 #advance to params panel
         #run sim
         data = sim.integrate(trajectory)
-        answer = float(app.Results.RangeResult.GetValue()) 
+        answer = float(app.Results.RangeResult.GetValue())
         #subtract from ans_est because method works to find zero
         del(sim) #delete last run
         del(data)
         return answer
-        
-        
+
+
 class AppFrame(wx.Frame):
 
     def __init__(self, parent, id, title):
@@ -1122,14 +1135,14 @@ class AppFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, (-1,-1), wx.Size(800,650)) # (width,length )
         font = wx.Font(8, wx.FONTFAMILY_SWISS, wx.NORMAL, wx.BOLD)
         wx.Frame.SetFont(self, font)
-        
+
         # Now Create the menu bar and items
         self.MenuBar = wx.MenuBar()
         FileMenu = wx.Menu()
         #hack
         about = FileMenu.Append(-1, 'About...')
         self.Bind(wx.EVT_MENU,self.OnAbout,about)
-        
+
         FileMenu.Append(200, 'Page Setup', 'Setup the printer page')
         wx.EVT_MENU(self, 200, self.OnFilePageSetup)
         FileMenu.Append(201, 'Print Preview', 'Show the current plot on page')
@@ -1145,7 +1158,7 @@ class AppFrame(wx.Frame):
         else:
             wx.App_SetMacExitMenuItemId(205) #mac-ify
         self.MenuBar.Append(FileMenu, '&File')
-        
+
         #Plot Menu, shamelessly stolen from wx.lib.plot.TestFrame
         PlotMenu = wx.Menu()
         PlotMenu.Append(211, '&Redraw', 'Redraw plot')
@@ -1153,9 +1166,9 @@ class AppFrame(wx.Frame):
         PlotMenu.Append(212, '&Clear', 'Clear canvas')
         self.Bind(wx.EVT_MENU,self.OnPlotClear, id=212)
         PlotMenu.Append(213, '&Scale', 'Scale canvas')
-        self.Bind(wx.EVT_MENU,self.OnPlotScale, id=213) 
+        self.Bind(wx.EVT_MENU,self.OnPlotScale, id=213)
         PlotMenu.Append(214, 'Enable &Zoom', 'Enable Mouse Zoom', kind=wx.ITEM_CHECK)
-        self.Bind(wx.EVT_MENU,self.OnEnableZoom, id=214) 
+        self.Bind(wx.EVT_MENU,self.OnEnableZoom, id=214)
         PlotMenu.Append(215, 'Enable &Grid', 'Turn on Grid', kind=wx.ITEM_CHECK)
         self.Bind(wx.EVT_MENU,self.OnEnableGrid, id=215)
         PlotMenu.Append(220, 'Enable &Legend', 'Turn on Legend', kind=wx.ITEM_CHECK)
@@ -1170,7 +1183,7 @@ class AppFrame(wx.Frame):
         HelpMenu = wx.Menu()
         HelpMenu.Append(300, '&About', 'About...')
         wx.EVT_MENU(self, 300, self.OnAbout)
-        
+
         if wx.Platform == "__WXMAC__":
             if "phoenix" in wx.PlatformInfo:
                 #macify
@@ -1184,7 +1197,7 @@ class AppFrame(wx.Frame):
         self.SetMenuBar(self.MenuBar)
         self.CreateStatusBar(1)
         self.SetStatusText("")
-        
+
         #load presets
         try:
             preset_path = os.path.join(self.get_main_dir(),"presets.514.txt")
@@ -1195,19 +1208,19 @@ class AppFrame(wx.Frame):
             dlg.ShowModal()
             dlg.Destroy()
             presets = {'Error reading presets.txt':{}}
-        
+
         #create tabs
         self.nb = wx.Notebook(self,-1)
         self.Params = ParamsPanel(self.nb, -1, presets)
         #elf.Fins = FinsPanel(self.nb, -1)
         self.Results = ResultsPanel(self.nb, -1)
         #self.Advanced = AdvancedPanel(self.nb, -1) TURNED OFF MAY 18
-        
+
         self.nb.AddPage(self.Params, "Parameters")
         #self.nb.AddPage(self.Fins, "Fin Geom Explanation")
         self.nb.AddPage(self.Results, "Results")
         #self.nb.AddPage(self.Advanced, "Advanced")
-        
+
     def OnFilePageSetup(self, event):
         self.Results.frame.canvas.PageSetup()
 
@@ -1222,7 +1235,7 @@ class AppFrame(wx.Frame):
 
     def OnFileExit(self, event):
         sys.exit()
-        
+
     def OnAbout(self, event):
         info = wx.adv.AboutDialogInfo()
         info.SetName('Ballistic Missile Simulator: 2020 Edition')
@@ -1234,7 +1247,7 @@ class AppFrame(wx.Frame):
         info.SetWebSite('http://www.levinger.net/josh')
         wx.adv.AboutBox(info)
 
-        
+
     #Plot Event Handlers, shamelessly stolen from wx.lib.plot.TestFrame
     def OnPlotRedraw(self,event):
         self.Results.frame.canvas.Redraw()
@@ -1254,7 +1267,7 @@ class AppFrame(wx.Frame):
         self.Results.frame.canvas.SetEnablePointLabel(event.IsChecked())
     def OnReset(self,event):
         self.Results.frame.canvas.Reset()
-        
+
     #to get relative exe location in windows
     #from http://aspn.activestate.com/ASPN/Mail/Message/py2exe-users/2264366
     def main_is_frozen(self):
@@ -1287,7 +1300,7 @@ class DigitsOnly(wx.PyValidator):
         self.Bind(wx.EVT_CHAR, self.OnChar)
     def Clone(self):
         return DigitsOnly()
-    
+
     def Validate(self, win):
         tc = self.GetWindow()
         val = tc.GetValue()
@@ -1295,10 +1308,10 @@ class DigitsOnly(wx.PyValidator):
             if x not in string.digits:
                 return False
         return True
-    
+
     def OnChar(self, event):
         key = event.GetKeyCode()
-        
+
         if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
             event.Skip()
             return
@@ -1323,7 +1336,7 @@ class IRBMApp(wx.App):
         self.MainFrame.Show(True)
         self.SetTopWindow(self.MainFrame)
         #self.BackgoundColour = 'grey'
-        
+
         return True
 
 #RUN
