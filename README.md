@@ -1,5 +1,5 @@
 # MISSILE TRAJECTORY SIMULATOR
-NOTE: THIS IS VERY MUCH BETA! STILL REQUIRES MUCH TESTING
+Bruce：convert python2 to python3
 
 This code is directly taken from Josh Levinger's Missile Trajectory simulator code. 
 Modifications are by me only and will be to improve its utility for our applications. 
